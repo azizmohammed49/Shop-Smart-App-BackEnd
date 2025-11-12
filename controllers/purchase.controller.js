@@ -3,6 +3,7 @@ import {
   createPurchase,
   listPurchases,
 } from "../repositories/purchase.repo.js";
+import { log } from "../utils/logger.js"; // Add this line
 
 export const addPurchase = async (req, res) => {
   try {
@@ -26,22 +27,37 @@ export const allPurchases = async (req, res) => {
   try {
     const page = req?.params?.page || 1;
     const pageSize = req?.params?.limit || 20;
-    const sort = { [req?.query?.sort]: [req?.query?.sortDir] };
+    const sort = { [req?.query?.sort]: req?.query?.sortDir || 1 };
     const search = req?.body?.search;
-    let fetchObj = { page, pageSize, sort: req.query.sort ? sort : {} };
+    const supplier = req?.body?.supplierId; // Use supplierId
+
+    let fetchObj = {
+      page,
+      pageSize,
+      sort: req.query.sort ? sort : {},
+      search,
+      supplier,
+    };
+
     const purchases = await listPurchases(fetchObj);
     const totalRecords = await countPurchases(fetchObj);
+
     res.status(200).json({
       success: true,
       message: "Purchases List fetched successfully!",
       totalRecords,
       data: purchases,
     });
-    log(req.userId || "", req.url, 200, "Purchase List fetched successfully!");
+    log(req.userId || "", req.url, 200, "Purchases List fetched successfully!");
   } catch (error) {
+    console.error("Purchase Error:", error); // Add detailed logging
     res
       .status(500)
-      .json({ success: false, message: "Failed to fetched Purchase!" });
-    log(req.userId || "", req.url, 500, "Failed to fetched Purchase!", error);
+      .json({
+        success: false,
+        message: "Failed to fetch Purchases!",
+        error: error.message,
+      });
+    log(req.userId || "", req.url, 500, "Failed to fetch Purchases!", error);
   }
 };

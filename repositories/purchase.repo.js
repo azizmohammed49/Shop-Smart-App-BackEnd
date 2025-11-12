@@ -4,28 +4,41 @@ export const createPurchase = (data) => {
   return PurchaseModel.create(data);
 };
 
-export const listPurchases = (data) => {
-  const page = data.page || 1;
-  const pageSize = data.pageSize || 20;
-  const skip = (page - 1) * pageSize;
-  const search = data.search;
-  const sort = data.sort;
+export const listPurchases = async (fetchObj) => {
+  const { page = 1, pageSize = 20, sort = {}, search, supplier } = fetchObj;
 
-  return PurchaseModel.find().sort(sort).skip(skip).limit(pageSize);
+  let query = {};
+
+  if (search) {
+    query.$or = [{ notes: { $regex: search, $options: "i" } }];
+  }
+
+  if (supplier) {
+    query.supplierId = supplier; // Use supplierId
+  }
+
+  const skip = (page - 1) * pageSize;
+
+  return await PurchaseModel.find(query)
+    .populate("supplierId", "supplierName email contactName") // Use supplierId
+    .sort(sort)
+    .skip(skip)
+    .limit(pageSize)
+    .exec();
 };
 
 export const countPurchases = (data) => {
-  const search = data.search;
+  const { search, supplier } = data;
 
   let filter = {};
 
   if (search) {
-    let searchOr = [{ name: { $regex: search, $options: "i" } }];
-    if (Object.keys(filter).length) {
-      filter = { $and: [filter, { $or: searchOr }] };
-    } else {
-      filter.$or = searchOr;
-    }
+    filter.$or = [{ notes: { $regex: search, $options: "i" } }];
   }
+
+  if (supplier) {
+    filter.supplierId = supplier; // Use supplierId
+  }
+
   return PurchaseModel.countDocuments(filter);
 };

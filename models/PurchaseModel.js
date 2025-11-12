@@ -9,7 +9,7 @@ const purchaseSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "supplier",
       required: true,
-    },
+    }, // Changed from supplier
     products: [productSchema],
     totalAmount: { type: Number, required: true },
     date: { type: Date, default: Date.now },
