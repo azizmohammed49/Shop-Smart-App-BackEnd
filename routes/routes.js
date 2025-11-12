@@ -9,6 +9,7 @@ const router = express.Router();
 router.use("/users", userRouter); // Remove trailing slash
 router.use("/products", productRouter); // Remove trailing slash
 router.use("/supplier", supplierRouter); // Example for another entity
+router.use("/purchase", (await import("./purchase.route.js")).default); // Lazy load purchase routes
 
 // Middleware to log the path
 router.use((req, res, next) => {
