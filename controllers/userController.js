@@ -20,24 +20,11 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
-    log(
-      undefined,
-      req.url,
-      error?.code === 11000 ? 400 : 500,
-      error?.code === 11000
-        ? "Email Already Exists!"
-        : "Internal Server Error!",
-      error
-    );
-    res
-      .status(error?.code === 11000 ? 400 : 500)
-      .json({
-        success: false,
-        message:
-          error?.code === 11000
-            ? "Email Already Exists!"
-            : "Internal Server Error!",
-      });
+    log(undefined, req.url, error?.code === 11000 ? 400 : 500, error?.code === 11000 ? "Email Already Exists!" : "Internal Server Error!", error);
+    res.status(error?.code === 11000 ? 400 : 500).json({
+      success: false,
+      message: error?.code === 11000 ? "Email Already Exists!" : "Internal Server Error!",
+    });
   }
 };
 
@@ -49,6 +36,7 @@ export const login = async (req, res) => {
       let isPassValid = await compareHash(password, user?.password);
       if (isPassValid) {
         const token = generateToken({ userId: user?._id });
+        res.cookie("token", token, { httpOnly: true, maxAge: 1000 * 60 * 60, secure: false });
         return res.status(200).json({
           success: true,
           message: "Login successful!",
@@ -66,13 +54,9 @@ export const login = async (req, res) => {
       }
     }
     log(undefined, req.url, 400, "Invalid Email/Password");
-    res
-      .status(400)
-      .json({ success: false, message: "Invalid Email/Password!" });
+    res.status(400).json({ success: false, message: "Invalid Email/Password!" });
   } catch (error) {
     log(undefined, req.url, 400, "Invalid Email/Password", error);
-    res
-      .status(400)
-      .json({ success: false, message: "Invalid Email/Password!" });
+    res.status(400).json({ success: false, message: "Invalid Email/Password!" });
   }
 };

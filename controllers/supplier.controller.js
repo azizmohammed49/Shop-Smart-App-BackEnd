@@ -1,8 +1,4 @@
-import {
-  countSuppliers,
-  createSupplier,
-  listSuppliers,
-} from "../repositories/supplier.repo.js";
+import { countSuppliers, createSupplier, listSuppliers } from "../repositories/supplier.repo.js";
 
 export const addSupplier = async (req, res) => {
   try {
@@ -15,9 +11,7 @@ export const addSupplier = async (req, res) => {
     });
     log(req.userId || "", req.url, 201, "Supplier added successfully!");
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to add Supplier!" });
+    res.status(500).json({ success: false, message: "Failed to add Supplier!" });
     log(req.userId || "", req.url, 500, "Failed to add Supplier!");
   }
 };
@@ -39,9 +33,23 @@ export const allSuppliers = async (req, res) => {
     });
     log(req.userId || "", req.url, 200, "Supplier List fetched successfully!");
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to fetched Supplier!" });
+    res.status(500).json({ success: false, message: "Failed to fetched Supplier!" });
+    log(req.userId || "", req.url, 500, "Failed to fetched Supplier!", error);
+  }
+};
+
+export const allSupplierMenu = async (req, res) => {
+  try {
+    let fetchObj = { projection: { _id: 1, supplierName: 1 } };
+    const suppliers = await listSuppliers(fetchObj);
+    res.status(200).json({
+      success: true,
+      message: "Supplier Menu List fetched successfully!",
+      data: suppliers,
+    });
+    log(req.userId || "", req.url, 200, "Supplier List fetched successfully!");
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to fetched Supplier!" });
     log(req.userId || "", req.url, 500, "Failed to fetched Supplier!", error);
   }
 };

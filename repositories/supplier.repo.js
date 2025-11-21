@@ -10,8 +10,9 @@ export const listSuppliers = (data) => {
   const skip = (page - 1) * pageSize;
   const search = data.search;
   const sort = data.sort;
+  const projection = data.projection || {};
 
-  return SupplierModel.find().sort(sort).skip(skip).limit(pageSize);
+  return SupplierModel.find({}, projection).sort(sort).skip(skip).limit(pageSize);
 };
 
 export const countSuppliers = (data) => {

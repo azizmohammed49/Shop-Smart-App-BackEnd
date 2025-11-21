@@ -2,6 +2,8 @@ import ProductModel from "../models/ProductModel.js";
 
 export const createProduct = (data) => ProductModel.create(data);
 
+export const createManyProduct = (data) => ProductModel.insertMany(data);
+
 export const listProducts = (data) => {
   const page = data.page || 1;
   const pageSize = data.pageSize || 20;
@@ -22,21 +24,14 @@ export const listProducts = (data) => {
   }
 
   if (search) {
-    let searchOr = [
-      { name: { $regex: search, $options: "i" } },
-      { purchasePrice: { $regex: search, $options: "i" } },
-    ];
+    let searchOr = [{ name: { $regex: search, $options: "i" } }, { purchasePrice: { $regex: search, $options: "i" } }];
     if (Object.keys(filter).length) {
       filter = { $and: [filter, { $or: searchOr }] };
     } else {
       filter.$or = searchOr;
     }
   }
-  return ProductModel.find(filter)
-    .populate({ path: "supplier", select: "supplierName" })
-    .sort(sort)
-    .skip(skip)
-    .limit(pageSize);
+  return ProductModel.find(filter).populate({ path: "supplier", select: "supplierName" }).sort(sort).skip(skip).limit(pageSize);
 };
 
 export const countProducts = (data) => {
@@ -55,10 +50,7 @@ export const countProducts = (data) => {
   }
 
   if (search) {
-    let searchOr = [
-      { name: { $regex: search, $options: "i" } },
-      { purchasePrice: { $regex: search, $options: "i" } },
-    ];
+    let searchOr = [{ name: { $regex: search, $options: "i" } }, { purchasePrice: { $regex: search, $options: "i" } }];
     if (Object.keys(filter).length) {
       filter = { $and: [filter, { $or: searchOr }] };
     } else {

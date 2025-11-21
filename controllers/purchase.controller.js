@@ -1,13 +1,15 @@
-import {
-  countPurchases,
-  createPurchase,
-  listPurchases,
-} from "../repositories/purchase.repo.js";
+import { createManyProduct } from "../repositories/product.repo.js";
+import { countPurchases, createPurchase, listPurchases } from "../repositories/purchase.repo.js";
 import { log } from "../utils/logger.js"; // Add this line
 
 export const addPurchase = async (req, res) => {
   try {
     const data = req.body;
+    if (data.newProducts?.length) {
+      const newPrd = await createManyProduct(data.newProducts);
+      const newPrdIds = newPrd?.map((prd) => prd?._id);
+      data.products = [...data.products, ...newPrdIds];
+    }
     const purchase = await createPurchase(data);
     res.status(201).json({
       success: true,
@@ -16,9 +18,7 @@ export const addPurchase = async (req, res) => {
     });
     log(req.userId || "", req.url, 201, "Purchase added successfully!");
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Failed to add Purchase!" });
+    res.status(500).json({ success: false, message: "Failed to add Purchase!" });
     log(req.userId || "", req.url, 500, "Failed to add Purchase!");
   }
 };
@@ -51,13 +51,11 @@ export const allPurchases = async (req, res) => {
     log(req.userId || "", req.url, 200, "Purchases List fetched successfully!");
   } catch (error) {
     console.error("Purchase Error:", error); // Add detailed logging
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to fetch Purchases!",
-        error: error.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch Purchases!",
+      error: error.message,
+    });
     log(req.userId || "", req.url, 500, "Failed to fetch Purchases!", error);
   }
 };
